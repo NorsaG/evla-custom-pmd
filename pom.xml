@@ -46,44 +46,44 @@
     </dependencies>
     <build>
         <plugins>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-pmd-plugin</artifactId>-->
-<!--                <version>3.13.0</version> &lt;!&ndash; or use version from pluginManagement &ndash;&gt;-->
-<!--                <dependencies>-->
-<!--                    <dependency>-->
-<!--                        <groupId>net.sourceforge.pmd</groupId>-->
-<!--                        <artifactId>pmd-java</artifactId>-->
-<!--                        <version>${pmd.version}</version>-->
-<!--                    </dependency>-->
-<!--                    <dependency>-->
-<!--                        <groupId>org.evla</groupId>-->
-<!--                        <artifactId>evla-custom-pmd</artifactId>-->
-<!--                        <version>0.1</version>-->
-<!--                    </dependency>-->
-<!--                </dependencies>-->
-<!--                <configuration>-->
-<!--                    &lt;!&ndash; failOnViolation is actually true by default, but can be disabled &ndash;&gt;-->
-<!--                    <failOnViolation>true</failOnViolation>-->
-<!--                    &lt;!&ndash; printFailingErrors is pretty useful &ndash;&gt;-->
-<!--                    <printFailingErrors>true</printFailingErrors>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.13.0</version> <!-- or use version from pluginManagement -->
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-java</artifactId>
+                        <version>${pmd.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.evla</groupId>
+                        <artifactId>evla-custom-pmd</artifactId>
+                        <version>0.1</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <!-- failOnViolation is actually true by default, but can be disabled -->
+                    <failOnViolation>true</failOnViolation>
+                    <!-- printFailingErrors is pretty useful -->
+                    <printFailingErrors>true</printFailingErrors>
 
-<!--                    <rulesets>-->
-<!--                        <ruleset>-->
-<!--                            ./src/main/resources/rules.xml-->
-<!--                        </ruleset>-->
-<!--                    </rulesets>-->
-<!--                </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>checkstyle-check</id>-->
-<!--                        <phase>validate</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>check</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+                    <rulesets>
+                        <ruleset>
+                            ./src/main/resources/rules.xml
+                        </ruleset>
+                    </rulesets>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle-check</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

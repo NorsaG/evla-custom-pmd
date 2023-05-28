@@ -7,18 +7,20 @@
         Rules which enforce generally accepted best practices.
     </description>
 
-    <rule name="PMDTest"
+    <rule name="PackageCouplingRule"
           language="java"
           since="3.0"
           message="This abstract test class doing nothing"
-          class="org.evla.pmd.PMDTest">
+          class="org.evla.pmd.PackageCouplingRule">
         <description>
             desc
         </description>
         <priority>3</priority>
-        <properties>
-            <property name="className" type="String" value=".." description="XXX"/>
-        </properties>
+<!--        <properties>-->
+<!--            <property name="className" >-->
+<!--                <value>org.evla.pmd.PackageCouplingRule</value>-->
+<!--            </property>-->
+<!--        </properties>-->
         <example>
             example
         </example>
