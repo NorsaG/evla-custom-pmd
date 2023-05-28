@@ -1,0 +1,26 @@
+<ruleset name="Best Practices"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Rules which enforce generally accepted best practices.
+    </description>
+
+    <rule name="PMDTest"
+          language="java"
+          since="3.0"
+          message="This abstract test class doing nothing"
+          class="org.evla.pmd.PMDTest">
+        <description>
+            desc
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="className" type="String" value=".." description="XXX"/>
+        </properties>
+        <example>
+            example
+        </example>
+    </rule>
+</ruleset>
