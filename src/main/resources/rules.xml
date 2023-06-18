@@ -1,4 +1,4 @@
-<ruleset name="Best Practices"
+<ruleset name="Custom Rules"
          xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
@@ -7,22 +7,218 @@
         Rules which enforce generally accepted best practices.
     </description>
 
-    <rule name="PackageCouplingRule"
+    <rule name="MonoSwitchIfEmptyIncorrectUsage"
           language="java"
-          since="3.0"
-          message="This abstract test class doing nothing"
-          class="org.evla.pmd.PackageCouplingRule">
+          message="Avoid direct call of Mono.switchIfEmpty with non-constant parameter and use Mono.defer instead"
+          class="net.sourceforge.pmd.lang.rule.XPathRule">
         <description>
-            desc
+            By design Mono.switchIfEmpty is being evaluated eagerly and it's always trigger alternative no matter what during stream
+            construction. To address this you can defer evaluation of a second mono by using Mono.defer.
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="xpath">
+                <value>
+                    <![CDATA[
+//PrimarySuffix[@Image = "switchIfEmpty"]
+[
+(following-sibling::PrimarySuffix/
+    Arguments/
+    ArgumentList/
+    Expression/
+    PrimaryExpression/
+    PrimaryPrefix/
+    Name/@Image != "Mono.defer"
+and
+following-sibling::PrimarySuffix/
+    Arguments/
+    ArgumentList/
+    Expression/
+    PrimaryExpression/
+    PrimaryPrefix/
+    Name/@Image != "Mono.error"
+)
+
+or
+(
+following-sibling::PrimarySuffix/
+    Arguments/
+    ArgumentList/
+    Expression/
+    PrimaryExpression/
+    PrimaryPrefix[Name[@Image = "Mono.error"]]
+    [count (following-sibling::PrimarySuffix/
+        Arguments/
+        ArgumentList/
+        Expression/
+        PrimaryExpression/
+        PrimaryPrefix/
+        LambdaExpression) = 0
+    ]
+    [count (following-sibling::PrimarySuffix/
+        Arguments/
+        ArgumentList/
+        Expression/
+        PrimaryExpression/
+        PrimarySuffix/
+        MemberSelector/
+        MethodReference) = 0
+    ])
+]
+]]>
+                </value>
+            </property>
+        </properties>
+        <example>
+            Mono
+            .just(...)
+            .map(...)
+            .switchIfEmpty(Mono.just(...)); // non-compliant
+
+            Mono
+            .just(...)
+            .map(...)
+            .switchIfEmpty(Mono.defer(() -> Mono.just(...))); // compliant
+
+
+            Mono. ... .switchIfEmpty(Mono.error(createException(...))) // non-compliant
+
+            Mono. ...  .switchIfEmpty(Mono.error(() -> createException(...))) // compliant
+            Mono. ... .switchIfEmpty(Mono.error(this::createException)) // compliant
+        </example>
+    </rule>
+
+    <rule name="OptionalOrElseIncorrectUsage"
+          language="java"
+          message="Avoid calling of Optional.orElse with non-constant parameters or use Optional.orElseGet instead"
+          class="net.sourceforge.pmd.lang.rule.XPathRule">
+        <description>
+            By design Optional.orElse is being evaluated eagerly and it's always trigger alternative no matter what during stream
+            construction. Use Optional.orElseGet instead.
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="xpath">
+                <value>
+                    <![CDATA[
+.//PrimarySuffix[@Image= "orElse"]
+[following-sibling::PrimarySuffix/Arguments/ArgumentList/Expression/PrimaryExpression[./PrimaryPrefix and count(./PrimarySuffix) > 0] ]
+]]>
+                </value>
+            </property>
+        </properties>
+        <example>
+            Optional
+            .of(...)
+            .map(...)
+            .orElse(getSomeValue()); // non-compliant
+
+            Optional
+            .of(...)
+            .map(...)
+            .orElseGet(() -> getSomeValue()); // compliant
+        </example>
+    </rule>
+
+    <rule name="MonoZipWithIncorrectUsage"
+          language="java"
+          message="Avoid Mono.zipWith call with non-constant parameter"
+          class="net.sourceforge.pmd.lang.rule.XPathRule">
+        <description>
+            Mono.zipWith is being evaluated eagerly in some case and may produce non-obvious behavior.
         </description>
         <priority>3</priority>
-<!--        <properties>-->
-<!--            <property name="className" >-->
-<!--                <value>org.evla.pmd.PackageCouplingRule</value>-->
-<!--            </property>-->
-<!--        </properties>-->
+        <properties>
+            <property name="xpath">
+                <value>
+                    <![CDATA[
+//PrimarySuffix[@Image = "zipWith"]
+[
+        following-sibling::
+        PrimarySuffix/
+        Arguments/
+        ArgumentList/
+        Expression/
+        PrimaryExpression
+        [
+        (PrimaryPrefix/Name[@Image != "Mono.defer"] and PrimaryPrefix/Name[@Image != "Mono.just"] )
+        or
+        (PrimaryPrefix/Name[@Image = "Mono.just"] and PrimarySuffix/Arguments/ArgumentList/Expression/PrimaryExpression[count(PrimarySuffix) > 0])
+        ]]
+        [
+        following-sibling::
+            PrimarySuffix/
+            Arguments/
+            ArgumentList/
+            Expression/
+            PrimaryExpression[
+                PrimaryPrefix/Name and count(PrimarySuffix) != 0
+            ]
+        ]
+]]>
+                </value>
+            </property>
+        </properties>
         <example>
-            example
+            Mono
+            .just(...)
+            .map(...)
+            .zipWith(Mono.just(...)); // non-compliant
+
+            Mono
+            .just(...)
+            .map(...)
+            .zipWith(Mono.defer(() -> Mono.just(...))); // compliant
+
+            or
+
+            Mono
+            .just(...)
+            .map(...)
+            .zipWith(Mono.just( {constant value} )); // compliant
+
+            or
+
+            Mono
+            .just(...)
+            .map(...)
+            .flatMap( v -> Mono.zip( ... )); // compliant
+        </example>
+    </rule>
+
+    <rule name="AvoidReactorTuple4AndMoreUsages"
+          language="java"
+          message="Avoid reactor Tuples with a lot of parameters"
+          class="net.sourceforge.pmd.lang.rule.XPathRule">
+        <description>
+            Tuples with more than 4 parameters signalise about bad design
+        </description>
+        <priority>2</priority>
+        <properties>
+            <property name="xpath">
+                <value>
+                    <![CDATA[
+//Name[@Image = "reactor.util.function.Tuple4"] |
+//Name[@Image = "reactor.util.function.Tuple5"] |
+//Name[@Image = "reactor.util.function.Tuple6"] |
+//Name[@Image = "reactor.util.function.Tuple7"] |
+//Name[@Image = "reactor.util.function.Tuple8"] |
+//ClassOrInterfaceType[@Image = "reactor.util.function.Tuple4"] |
+//ClassOrInterfaceType[@Image = "reactor.util.function.Tuple5"] |
+//ClassOrInterfaceType[@Image = "reactor.util.function.Tuple6"] |
+//ClassOrInterfaceType[@Image = "reactor.util.function.Tuple7"] |
+//ClassOrInterfaceType[@Image = "reactor.util.function.Tuple8"] |
+//ClassOrInterfaceType[@Image = "Tuple4"] |
+//ClassOrInterfaceType[@Image = "Tuple5"] |
+//ClassOrInterfaceType[@Image = "Tuple6"] |
+//ClassOrInterfaceType[@Image = "Tuple7"] |
+//ClassOrInterfaceType[@Image = "Tuple8"]
+]]>
+                </value>
+            </property>
+        </properties>
+        <example>
+            Try to avoid Tuple[4-8] and simplify logic
         </example>
     </rule>
 </ruleset>

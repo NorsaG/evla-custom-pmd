@@ -1,4 +1,4 @@
-package org.evla.pmd;
+package org.evla.pmd.tree;
 
 import net.sourceforge.pmd.lang.java.ast.ASTAnyTypeDeclaration;
 import net.sourceforge.pmd.lang.java.ast.ASTClassOrInterfaceDeclaration;
